@@ -741,7 +741,6 @@ async function runRecommendation() {
   const city = $("citySelect").value;
   const area = $("areaSelect").value;
   const radius = Number($("radiusSelect").value);
-  const startedAt = Date.now();
   setLoading(true);
 
   try {
@@ -765,9 +764,6 @@ async function runRecommendation() {
       intentProfile,
       candidateBars,
     });
-
-    const remainingAnimation = Math.max(0, 850 - (Date.now() - startedAt));
-    if (remainingAnimation) await new Promise((resolve) => window.setTimeout(resolve, remainingAnimation));
 
     renderRecommendations(result);
     setUrlState({ intentText, city, area, radius });

@@ -331,7 +331,7 @@ body.finder-page-open .finder-stage {
   mix-blend-mode: multiply;
   opacity: 0.62;
   transform-origin: bottom;
-  animation: bottle-fill 1.65s ease-in-out infinite;
+  animation: bottle-fill 10s ease-in-out infinite;
 }
 
 .pour-stream {
@@ -341,7 +341,7 @@ body.finder-page-open .finder-stage {
   background: linear-gradient(180deg, rgba(255, 225, 122, 0), rgba(255, 185, 63, 0.96), rgba(146, 55, 21, 0.98));
   box-shadow: 0 0 20px rgba(255, 186, 69, 0.45);
   transform-origin: bottom;
-  animation: pour-stream 1.65s ease-in-out infinite;
+  animation: pour-stream 10s ease-in-out infinite;
 }
 
 .pour-loader p {
