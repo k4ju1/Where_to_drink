@@ -202,8 +202,25 @@ async function searchGooglePlaces({ intentText, cityConfig, area, radiusKm }) {
   });
 
   if (!response.ok) {
-    const detail = await response.text();
-    return { ok: false, reason: "google_places_error", detail: detail.slice(0, 500), bars: [] };
+    const rawDetail = await response.text();
+    let detail = rawDetail.slice(0, 500);
+    let googleReason = "";
+
+    try {
+      const parsed = JSON.parse(rawDetail);
+      googleReason = parsed.error?.details?.find((item) => item.reason)?.reason || "";
+      detail = parsed.error?.message || detail;
+    } catch {
+      // Keep Google's raw text when it is not JSON.
+    }
+
+    return {
+      ok: false,
+      reason: "google_places_error",
+      googleReason,
+      detail: detail.slice(0, 500),
+      bars: [],
+    };
   }
 
   const data = await response.json();

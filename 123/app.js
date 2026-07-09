@@ -366,8 +366,11 @@ async function resolveCandidateBars({ intentText, city, area, radius }) {
       }),
     });
 
-    if (!response.ok) throw new Error(`Bar search unavailable: ${response.status}`);
     const data = await response.json();
+    if (!response.ok) {
+      const detail = data.googleReason === "API_KEY_INVALID" ? "Google key invalid" : data.detail || data.reason;
+      throw new Error(detail || `Bar search unavailable: ${response.status}`);
+    }
     if (!data.ok || !Array.isArray(data.bars)) throw new Error(data.reason || "No bars");
 
     return {
@@ -375,10 +378,10 @@ async function resolveCandidateBars({ intentText, city, area, radius }) {
       sourceLabel: data.cached ? "Google cached" : "Google Places",
       apiAvailable: true,
     };
-  } catch {
+  } catch (error) {
     return {
       bars: localBars,
-      sourceLabel: localBars.length ? "manual fallback" : "no bar source",
+      sourceLabel: localBars.length ? `manual fallback (${error.message})` : error.message || "no bar source",
       apiAvailable: false,
     };
   }
