@@ -134,105 +134,6 @@ const taxonomy = [
   },
 ];
 
-const fallbackBars = [
-  {
-    id: "bar_042",
-    name: "霧所 Mist",
-    area: "靜安寺",
-    price: "$$$",
-    distances: { 靜安寺: 0.8, 新天地: 2.7, 外灘: 4.2, 徐家匯: 3.6 },
-    reviews: [
-      "藏在巷子裡沒有招牌，推開書櫃才是入口，超有儀式感！調酒師會先問你今天心情再客製",
-      "酒好喝但真的不便宜，一杯都要400起。適合帶曖昧對象來，燈光很美",
-      "週五去人太多，DJ 很嗨，跟朋友講話要用喊的",
-    ],
-  },
-  {
-    id: "bar_108",
-    name: "小聲 Bar Low",
-    area: "靜安寺",
-    price: "$$",
-    distances: { 靜安寺: 1.1, 新天地: 2.9, 外灘: 4.8, 徐家匯: 2.8 },
-    reviews: [
-      "音量剛好，很適合兩三個朋友安靜聊天，沙發坐起來很舒服",
-      "bartender 很親切，會問你喜歡酸還是甜再推薦調酒",
-      "價格不算便宜但不趕人，一個人坐吧台也很自在",
-    ],
-  },
-  {
-    id: "bar_217",
-    name: "Radio Rooftop",
-    area: "外灘",
-    price: "$$$",
-    distances: { 靜安寺: 4.1, 新天地: 2.6, 外灘: 0.6, 徐家匯: 6.2 },
-    reviews: [
-      "天台夜景真的漂亮，帶朋友來拍照很有面子",
-      "週末 DJ 很嗨，舞池人很多，適合想 high 的晚上",
-      "酒普通而且偏貴，主要是買景觀和氣氛",
-    ],
-  },
-  {
-    id: "bar_305",
-    name: "麥芽巷 Alley Tap",
-    area: "新天地",
-    price: "$",
-    distances: { 靜安寺: 2.3, 新天地: 0.7, 外灘: 2.8, 徐家匯: 4.7 },
-    reviews: [
-      "精釀啤酒選擇多，happy hour 很划算，氣氛隨性",
-      "有大桌可以訂位，朋友聚會不用太拘束",
-      "店員很友善，還可以帶狗坐門口的位置",
-    ],
-  },
-  {
-    id: "bar_411",
-    name: "Blue Hour Jazz",
-    area: "徐家匯",
-    price: "$$",
-    distances: { 靜安寺: 3.4, 新天地: 4.8, 外灘: 6.5, 徐家匯: 0.9 },
-    reviews: [
-      "晚上有爵士 live band，現場音樂很穩，氣氛成熟",
-      "燈光昏暗，適合約會，也可以安靜聽歌",
-      "威士忌選擇不少，bartender 對酒很懂",
-    ],
-  },
-  {
-    id: "bar_526",
-    name: "Neon Room",
-    area: "新天地",
-    price: "$$",
-    distances: { 靜安寺: 2.5, 新天地: 0.9, 外灘: 2.4, 徐家匯: 4.9 },
-    reviews: [
-      "電子樂和 DJ 都在線，週五晚上非常熱鬧",
-      "舞池不大但大家都在跳，適合想喝完繼續蹦",
-      "音樂太轟，完全不適合聊天",
-    ],
-  },
-  {
-    id: "bar_630",
-    name: "Bottle Archive",
-    area: "靜安寺",
-    price: "$$$",
-    distances: { 靜安寺: 1.4, 新天地: 3.2, 外灘: 4.9, 徐家匯: 3.1 },
-    reviews: [
-      "威士忌和 gin 的收藏很完整，酒單厚到可以慢慢看",
-      "老闆很懂酒，會根據預算和口味推薦",
-      "座位不多，氣氛安靜，適合認真喝一杯",
-    ],
-  },
-  {
-    id: "bar_744",
-    name: "Porch & Paws",
-    area: "徐家匯",
-    price: "$$",
-    distances: { 靜安寺: 3.1, 新天地: 4.3, 外灘: 6.4, 徐家匯: 0.7 },
-    reviews: [
-      "寵物友善，可以帶狗坐露台，店員會給水碗",
-      "啤酒和簡單調酒都有，價格合理，晚上很 chill",
-      "空間不算大，不太適合很多人聚會",
-    ],
-  },
-];
-
 const fallbackCities = [
   {
     id: "shanghai",
@@ -257,18 +158,26 @@ function dianpingUrlFor(cityId, title) {
   return `https://www.dianping.com/search/keyword/${cityCode}/0_${encodeURIComponent(title)}`;
 }
 
-const bars = (window.BAR_DATA?.bars || fallbackBars).map((bar) => {
+function normalizeBarRecord(bar) {
   const city = bar.city || "shanghai";
+  const cityConfig = cityCatalog.find((item) => item.id === city);
   const title = bar.title || bar.name;
 
   return {
-    city: "shanghai",
-    cityLabel: "上海",
+    city,
+    cityLabel: cityConfig?.label || bar.cityLabel || "上海",
     ...bar,
     title,
+    name: bar.name || title,
+    source: bar.source || "manual",
+    distances: bar.distances || {},
+    reviews: Array.isArray(bar.reviews) ? bar.reviews : [],
+    placeUrl: bar.placeUrl || bar.place_url || "",
     dianpingUrl: bar.dianpingUrl || dianpingUrlFor(city, title),
   };
-});
+}
+
+const manualBars = (window.BAR_DATA?.bars || []).map(normalizeBarRecord);
 
 const fallbackIntentTags = ["craft_cocktails", "cozy_chill"];
 const $ = (id) => document.getElementById(id);
@@ -424,15 +333,73 @@ async function resolveIntentProfile(intentText) {
   }
 }
 
+function mergeBars(apiBars = [], localBars = []) {
+  const merged = new Map();
+  apiBars.map(normalizeBarRecord).forEach((bar) => {
+    const key = bar.googlePlaceId || bar.id || `${bar.city}:${bar.title}`;
+    merged.set(key, bar);
+  });
+  localBars.forEach((bar) => {
+    const key = bar.googlePlaceId || bar.id || `${bar.city}:${bar.title}`;
+    merged.set(key, { ...bar, source: bar.source || "manual" });
+  });
+  return [...merged.values()];
+}
+
+async function resolveCandidateBars({ intentText, city, area, radius }) {
+  const localBars = manualBars.filter((bar) => bar.city === city);
+
+  if (!location.protocol.startsWith("http")) {
+    return { bars: localBars, sourceLabel: "manual", apiAvailable: false };
+  }
+
+  try {
+    const response = await fetch("/api/bars", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        intentText,
+        city,
+        area,
+        radius,
+        cityConfig: cityById(city),
+      }),
+    });
+
+    if (!response.ok) throw new Error(`Bar search unavailable: ${response.status}`);
+    const data = await response.json();
+    if (!data.ok || !Array.isArray(data.bars)) throw new Error(data.reason || "No bars");
+
+    return {
+      bars: mergeBars(data.bars, localBars),
+      sourceLabel: data.cached ? "Google cached" : "Google Places",
+      apiAvailable: true,
+    };
+  } catch {
+    return {
+      bars: localBars,
+      sourceLabel: localBars.length ? "manual fallback" : "no bar source",
+      apiAvailable: false,
+    };
+  }
+}
+
 function distanceFor(bar, area) {
-  return bar.distances[area] ?? 4.5;
+  return bar.distances?.[area] ?? 4.5;
 }
 
 function cityById(cityId) {
   return cityCatalog.find((city) => city.id === cityId) || cityCatalog[0];
 }
 
-function recommendBars({ intentText, city, area, radius, intentProfile = fallbackIntentProfile(intentText) }) {
+function recommendBars({
+  intentText,
+  city,
+  area,
+  radius,
+  intentProfile = fallbackIntentProfile(intentText),
+  candidateBars = manualBars,
+}) {
   const currentCity = cityById(city);
 
   if (intentProfile.is_relevant === false) {
@@ -457,7 +424,7 @@ function recommendBars({ intentText, city, area, radius, intentProfile = fallbac
   const tagWeights = Object.fromEntries(
     (intentProfile.weighted_tags || []).map((item) => [item.tag, Math.max(0.35, item.confidence || 0.6)]),
   );
-  const analyzedBars = bars.filter((bar) => bar.city === currentCity.id).map(analyzeBar);
+  const analyzedBars = candidateBars.filter((bar) => bar.city === currentCity.id).map(analyzeBar);
 
   const results = analyzedBars
     .map((bar) => {
@@ -469,7 +436,7 @@ function recommendBars({ intentText, city, area, radius, intentProfile = fallbac
 
         return {
           tag,
-          label: taxon.label,
+          label: taxon?.label || tag,
           score: +score.toFixed(3),
           evidence: evidenceTag?.evidence || [],
         };
@@ -477,6 +444,20 @@ function recommendBars({ intentText, city, area, radius, intentProfile = fallbac
 
       const matchedIntents = matchDetails.filter((item) => item.score > 0);
       const warnings = matchDetails.filter((item) => item.score < 0);
+      const sourceRelevance = bar.source === "google" ? Math.max(0.08, 0.32 - (bar.sourceRank || 0) * 0.025) : 0;
+      const sourceMatchedIntents =
+        !matchedIntents.length && sourceRelevance > 0
+          ? intentTags.slice(0, 2).map((tag) => {
+              const taxon = taxonomy.find((item) => item.tag === tag);
+              return {
+                tag,
+                label: taxon?.label || tag,
+                score: +sourceRelevance.toFixed(3),
+                evidence: ["Google Places 根據你的文字需求和位置返回了這家店"],
+              };
+            })
+          : [];
+      const effectiveMatchedIntents = matchedIntents.length ? matchedIntents : sourceMatchedIntents;
       const positiveScore = matchDetails.reduce(
         (sum, item) => sum + Math.max(0, item.score) * (tagWeights[item.tag] || 0.62),
         0,
@@ -486,20 +467,27 @@ function recommendBars({ intentText, city, area, radius, intentProfile = fallbac
         0,
       );
       const distanceScore = Math.max(0, 1 - distanceKm / radius);
-      const finalScore = positiveScore * 0.72 + distanceScore * 0.28 - negativePenalty * 0.45;
+      const ratingScore = bar.rating ? Math.min(1, Math.max(0, (bar.rating - 3.5) / 1.5)) : 0;
+      const finalScore =
+        positiveScore * 0.62 + sourceRelevance * 0.38 + distanceScore * 0.22 + ratingScore * 0.1 - negativePenalty * 0.45;
 
       return {
         id: bar.id,
         name: bar.name,
         title: bar.title,
         dianping_url: bar.dianpingUrl,
+        place_url: bar.placeUrl || bar.dianpingUrl,
+        source: bar.source || "manual",
         city: bar.city,
         cityLabel: bar.cityLabel,
         area: bar.area,
+        address: bar.address || bar.realWorld?.address || "",
+        rating: bar.rating || 0,
+        userRatingCount: bar.userRatingCount || 0,
         price: bar.price,
         distance_km: +distanceKm.toFixed(1),
         recommendation_score: +Math.max(0, finalScore).toFixed(3),
-        matched_intents: matchedIntents,
+        matched_intents: effectiveMatchedIntents,
         warnings,
         top_vibes: bar.tags
           .filter((item) => item.polarity === "positive")
@@ -521,7 +509,7 @@ function recommendBars({ intentText, city, area, radius, intentProfile = fallbac
     radius_km: radius,
     intent_tags: intentTags.map((tag) => {
       const taxon = taxonomy.find((item) => item.tag === tag);
-      return { tag, label: taxon.label };
+      return { tag, label: taxon?.label || tag };
     }),
     summary: buildSummary(results, intentTags, currentCity.label, area),
     recommendations: results,
@@ -656,6 +644,11 @@ function renderRecommendations(result) {
       const warnings = bar.warnings
         .map((item) => `<span class="warning-token">${item.label}偏弱</span>`)
         .join("");
+      const linkLabel = bar.source === "google" ? "Google Maps" : "大众点评";
+      const ratingMeta = bar.rating
+        ? ` · ★ ${bar.rating.toFixed(1)}${bar.userRatingCount ? ` (${bar.userRatingCount})` : ""}`
+        : "";
+      const addressMeta = bar.address ? ` · ${escapeHtml(bar.address)}` : "";
 
       return `
         <article class="recommendation-card">
@@ -665,8 +658,8 @@ function renderRecommendations(result) {
               <div>
                 <h3>${escapeHtml(bar.title || bar.name)}</h3>
                 <p>
-                  ${escapeHtml(bar.cityLabel)} · ${escapeHtml(bar.area)} · ${bar.distance_km.toFixed(1)} km · ${escapeHtml(bar.price)}
-                  <a class="dianping-link" href="${escapeHtml(bar.dianping_url)}" target="_blank" rel="noopener noreferrer">大众点评</a>
+                  ${escapeHtml(bar.cityLabel)} · ${escapeHtml(bar.area)} · ${bar.distance_km.toFixed(1)} km · ${escapeHtml(bar.price)}${ratingMeta}${addressMeta}
+                  <a class="dianping-link" href="${escapeHtml(bar.place_url || bar.dianping_url)}" target="_blank" rel="noopener noreferrer">${linkLabel}</a>
                 </p>
               </div>
               <div class="score-badge">${Math.round(bar.recommendation_score * 100)}</div>
@@ -718,18 +711,30 @@ async function runRecommendation() {
   const radius = Number($("radiusSelect").value);
   $("statusPill").textContent = "Reading intent";
   const intentProfile = await resolveIntentProfile(intentText);
+  let candidateBars = manualBars.filter((bar) => bar.city === city);
+  let barSourceLabel = candidateBars.length ? "manual" : "no bar source";
+
+  if (intentProfile.is_relevant !== false) {
+    $("statusPill").textContent = "Finding real bars";
+    const resolvedBars = await resolveCandidateBars({ intentText, city, area, radius });
+    candidateBars = resolvedBars.bars;
+    barSourceLabel = resolvedBars.sourceLabel;
+  }
+
   const result = recommendBars({
     intentText,
     city,
     area,
     radius,
     intentProfile,
+    candidateBars,
   });
 
   renderRecommendations(result);
   setUrlState({ intentText, city, area, radius });
   const parserLabel = intentProfile.source === "local" ? "local" : "Gemini";
-  $("statusPill").textContent = `${parserLabel} · ${result.recommendations.length} / ${bars.filter((bar) => bar.city === city).length} bars`;
+  $("statusPill").textContent =
+    `${parserLabel} · ${barSourceLabel} · ${result.recommendations.length} / ${candidateBars.filter((bar) => bar.city === city).length} bars`;
 }
 
 function setDefaultSearchControls() {

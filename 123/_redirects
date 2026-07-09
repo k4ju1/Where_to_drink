@@ -1,2 +1,3 @@
+/api/bars /.netlify/functions/bars 200
 /api/intent /.netlify/functions/intent 200
 /* /index.html 200

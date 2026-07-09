@@ -2,6 +2,11 @@
   publish = "."
 
 [[redirects]]
+  from = "/api/bars"
+  to = "/.netlify/functions/bars"
+  status = 200
+
+[[redirects]]
   from = "/api/intent"
   to = "/.netlify/functions/intent"
   status = 200

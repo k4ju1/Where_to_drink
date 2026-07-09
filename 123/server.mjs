@@ -4,6 +4,7 @@ import { readFile } from "node:fs/promises";
 import { extname, join, normalize } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseIntentRequest } from "./lib/intent-parser.mjs";
+import { searchBarsRequest } from "./lib/place-search.mjs";
 
 const root = fileURLToPath(new URL(".", import.meta.url));
 
@@ -31,6 +32,7 @@ loadLocalEnv();
 const port = Number(process.env.PORT || 8123);
 const geminiApiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || "";
 const geminiModel = process.env.GEMINI_MODEL || "gemini-3.5-flash";
+const placesApiKey = process.env.GOOGLE_PLACES_API_KEY || process.env.GOOGLE_MAPS_API_KEY || "";
 
 const mimeTypes = {
   ".html": "text/html; charset=utf-8",
@@ -67,6 +69,11 @@ async function handleIntent(request, response) {
   sendJson(response, result.status, result.body);
 }
 
+async function handleBars(request, response) {
+  const result = await searchBarsRequest(await readRequestJson(request));
+  sendJson(response, result.status, result.body);
+}
+
 async function serveStatic(request, response) {
   const url = new URL(request.url, `http://${request.headers.host}`);
   const pathname = decodeURIComponent(url.pathname);
@@ -97,6 +104,11 @@ createServer((request, response) => {
     return;
   }
 
+  if (request.method === "POST" && request.url?.startsWith("/api/bars")) {
+    handleBars(request, response);
+    return;
+  }
+
   if (request.method === "GET" || request.method === "HEAD") {
     serveStatic(request, response);
     return;
@@ -108,5 +120,8 @@ createServer((request, response) => {
   console.log(`Barfinder running at http://127.0.0.1:${port}`);
   if (!geminiApiKey) {
     console.log("Gemini parser disabled: set GEMINI_API_KEY to enable it.");
+  }
+  if (!placesApiKey) {
+    console.log("Google Places search disabled: set GOOGLE_PLACES_API_KEY to enable real bars.");
   }
 });
