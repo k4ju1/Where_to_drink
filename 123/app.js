@@ -188,6 +188,7 @@ function normalizeBarRecord(bar) {
 
 const manualBars = (window.BAR_DATA?.bars || []).map(normalizeBarRecord);
 
+const lowReviewEvidenceText = "评论较少，暂时无法得到有效信息";
 const fallbackIntentTags = ["craft_cocktails", "cozy_chill"];
 const $ = (id) => document.getElementById(id);
 
@@ -464,13 +465,13 @@ function recommendBars({
       const sourceRelevance = bar.source === "google" ? Math.max(0.08, 0.32 - (bar.sourceRank || 0) * 0.025) : 0;
       const sourceMatchedIntents =
         !matchedIntents.length && sourceRelevance > 0
-          ? intentTags.slice(0, 2).map((tag) => {
+          ? intentTags.slice(0, 2).map((tag, index) => {
               const taxon = taxonomy.find((item) => item.tag === tag);
               return {
                 tag,
                 label: taxon?.label || tag,
                 score: +sourceRelevance.toFixed(3),
-                evidence: ["Google Places 根據你的文字需求和位置返回了這家店"],
+                evidence: index === 0 ? [lowReviewEvidenceText] : [],
               };
             })
           : [];
@@ -579,7 +580,11 @@ function buildAgentReply(result) {
   const topEvidence = top.matched_intents.flatMap((item) => item.evidence).filter(Boolean)[0];
   const lead = `我理解你要的是「${understood}」。我會先推薦你去 ${top.title || top.name}。它在 ${top.area}，離你大約 ${top.distance_km.toFixed(1)}km，最貼近「${topMatches}」。`;
   const reasons = [
-    topEvidence ? `評論裡有這句很關鍵：「${topEvidence}」` : `它的整體 vibe 和你的需求最接近。`,
+    topEvidence === lowReviewEvidenceText
+      ? lowReviewEvidenceText
+      : topEvidence
+        ? `評論裡有這句很關鍵：「${topEvidence}」`
+        : `它的整體 vibe 和你的需求最接近。`,
     `${top.price} 價位，適合今晚直接過去試一杯。`,
   ];
 
@@ -654,6 +659,7 @@ function renderRecommendations(result) {
       const vibes = bar.top_vibes.map((item) => `<span class="vibe-token">${item.label}</span>`).join("");
       const evidence = bar.matched_intents
         .flatMap((item) => item.evidence)
+        .filter((line, lineIndex, lines) => lines.indexOf(line) === lineIndex)
         .slice(0, 2);
       const evidenceHtml = (evidence.length ? evidence : bar.review_evidence)
         .map((line) => `<li>${escapeHtml(line)}</li>`)
