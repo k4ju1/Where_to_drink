@@ -18,7 +18,7 @@
     <link rel="manifest" href="./site.webmanifest" />
     <link rel="preload" as="image" href="./assets/angel-mural-vertical.webp" fetchpriority="high" />
     <link rel="preload" as="image" href="./assets/barfinder-rye-bottle.webp" fetchpriority="high" />
-    <link rel="stylesheet" href="./styles.css?v=20260709-chatglass" />
+    <link rel="stylesheet" href="./styles.css?v=20260709-loadercity" />
   </head>
   <body>
     <main class="app-shell">
@@ -42,6 +42,10 @@
         <section class="chat-stage" id="agentDialog" aria-label="Agent 對話框">
           <div class="chat-panel">
             <h2>Where to drink tonight?</h2>
+            <label class="landing-city-control">
+              <span>City</span>
+              <select id="landingCitySelect"></select>
+            </label>
             <textarea
               id="landingIntentInput"
               spellcheck="false"
@@ -145,9 +149,26 @@
             </section>
           </div>
         </div>
+        <div class="loading-overlay" id="loadingOverlay" aria-live="polite" aria-hidden="true">
+          <div class="pour-loader">
+            <div class="pour-stream" aria-hidden="true"></div>
+            <div class="loader-bottle-wrap" aria-hidden="true">
+              <div class="loader-bottle-fill"></div>
+              <img
+                class="loader-bottle"
+                src="./assets/barfinder-rye-bottle.webp"
+                width="905"
+                height="1360"
+                decoding="async"
+                alt=""
+              />
+            </div>
+            <p>Pouring your night...</p>
+          </div>
+        </div>
       </section>
     </main>
     <script src="./data.js?v=20260709-areas"></script>
-    <script src="./app.js?v=20260709-areas"></script>
+    <script src="./app.js?v=20260709-loadercity"></script>
   </body>
 </html>

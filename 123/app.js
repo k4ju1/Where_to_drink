@@ -597,9 +597,11 @@ function buildAgentReply(result) {
 }
 
 function renderCityOptions() {
-  $("citySelect").innerHTML = cityCatalog
+  const options = cityCatalog
     .map((city) => `<option value="${city.id}">${city.label}</option>`)
     .join("");
+  $("citySelect").innerHTML = options;
+  $("landingCitySelect").innerHTML = options;
 }
 
 function renderAreaOptions(cityId, preferredArea = "") {
@@ -697,6 +699,13 @@ function renderRecommendations(result) {
     .join("");
 }
 
+function setLoading(isLoading) {
+  const overlay = $("loadingOverlay");
+  if (!overlay) return;
+  overlay.classList.toggle("is-active", isLoading);
+  overlay.setAttribute("aria-hidden", isLoading ? "false" : "true");
+}
+
 function renderAgentAnswer(reply) {
   const reasons = reply.reasons.map((line) => `<li>${escapeHtml(line)}</li>`).join("");
   const alternatives = reply.alternatives.length
@@ -732,37 +741,48 @@ async function runRecommendation() {
   const city = $("citySelect").value;
   const area = $("areaSelect").value;
   const radius = Number($("radiusSelect").value);
-  setStatus("Reading intent");
-  const intentProfile = await resolveIntentProfile(intentText);
-  let candidateBars = manualBars.filter((bar) => bar.city === city);
-  let barSourceLabel = candidateBars.length ? "manual" : "no bar source";
+  const startedAt = Date.now();
+  setLoading(true);
 
-  if (intentProfile.is_relevant !== false) {
-    setStatus("Finding real bars");
-    const resolvedBars = await resolveCandidateBars({ intentText, city, area, radius });
-    candidateBars = resolvedBars.bars;
-    barSourceLabel = resolvedBars.sourceLabel;
+  try {
+    setStatus("Reading intent");
+    const intentProfile = await resolveIntentProfile(intentText);
+    let candidateBars = manualBars.filter((bar) => bar.city === city);
+    let barSourceLabel = candidateBars.length ? "manual" : "no bar source";
+
+    if (intentProfile.is_relevant !== false) {
+      setStatus("Finding real bars");
+      const resolvedBars = await resolveCandidateBars({ intentText, city, area, radius });
+      candidateBars = resolvedBars.bars;
+      barSourceLabel = resolvedBars.sourceLabel;
+    }
+
+    const result = recommendBars({
+      intentText,
+      city,
+      area,
+      radius,
+      intentProfile,
+      candidateBars,
+    });
+
+    const remainingAnimation = Math.max(0, 850 - (Date.now() - startedAt));
+    if (remainingAnimation) await new Promise((resolve) => window.setTimeout(resolve, remainingAnimation));
+
+    renderRecommendations(result);
+    setUrlState({ intentText, city, area, radius });
+    const parserLabel = intentProfile.source === "local" ? "local" : "Gemini";
+    setStatus(
+      `${parserLabel} · ${barSourceLabel} · ${result.recommendations.length} / ${candidateBars.filter((bar) => bar.city === city).length} bars`,
+    );
+  } finally {
+    setLoading(false);
   }
-
-  const result = recommendBars({
-    intentText,
-    city,
-    area,
-    radius,
-    intentProfile,
-    candidateBars,
-  });
-
-  renderRecommendations(result);
-  setUrlState({ intentText, city, area, radius });
-  const parserLabel = intentProfile.source === "local" ? "local" : "Gemini";
-  setStatus(
-    `${parserLabel} · ${barSourceLabel} · ${result.recommendations.length} / ${candidateBars.filter((bar) => bar.city === city).length} bars`,
-  );
 }
 
 function setDefaultSearchControls() {
   $("citySelect").value = "shanghai";
+  $("landingCitySelect").value = "shanghai";
   renderAreaOptions("shanghai", "新天地");
   $("radiusSelect").value = "3";
 }
@@ -819,6 +839,7 @@ function initializeFromUrl() {
     ? state.city
     : cityCatalog[0].id;
   $("citySelect").value = selectedCity;
+  $("landingCitySelect").value = selectedCity;
   renderAreaOptions(selectedCity, state.area);
 
   if (state.radius && [...$("radiusSelect").options].some((option) => option.value === state.radius)) {
@@ -839,7 +860,10 @@ function openFinderInterface() {
 
 function enterFinderFromChat() {
   const chatText = $("landingIntentInput")?.value.trim();
+  const landingCity = $("landingCitySelect")?.value || "shanghai";
   if (chatText) $("intentInput").value = chatText;
+  $("citySelect").value = landingCity;
+  renderAreaOptions(landingCity);
   openFinderInterface();
   runRecommendation();
 }
@@ -863,8 +887,13 @@ function bindEvents() {
   });
   $("recommendBtn").addEventListener("click", runRecommendation);
   $("copyBtn").addEventListener("click", copyJson);
+  $("landingCitySelect").addEventListener("change", () => {
+    $("citySelect").value = $("landingCitySelect").value;
+    renderAreaOptions($("landingCitySelect").value);
+  });
   $("citySelect").addEventListener("change", () => {
     renderAreaOptions($("citySelect").value);
+    $("landingCitySelect").value = $("citySelect").value;
     runRecommendation();
   });
   $("areaSelect").addEventListener("change", runRecommendation);

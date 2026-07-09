@@ -221,6 +221,36 @@ body.finder-page-open .intro-scroll {
   text-shadow: 0 3px 18px rgba(8, 10, 8, 0.62);
 }
 
+.landing-city-control {
+  display: block;
+  width: min(260px, 72vw);
+  margin: 22px auto 0;
+}
+
+.landing-city-control span {
+  color: rgba(255, 253, 246, 0.86);
+  text-align: center;
+  text-shadow: 0 2px 12px rgba(8, 10, 8, 0.52);
+}
+
+.landing-city-control select {
+  height: 48px;
+  border-color: rgba(255, 253, 246, 0.5);
+  background:
+    linear-gradient(45deg, transparent 50%, rgba(255, 253, 246, 0.78) 50%) calc(100% - 20px) 21px / 7px 7px no-repeat,
+    linear-gradient(135deg, rgba(255, 253, 246, 0.78) 50%, transparent 50%) calc(100% - 13px) 21px / 7px 7px no-repeat,
+    rgba(255, 253, 246, 0.26);
+  color: #fffdf6;
+  text-align: center;
+  text-align-last: center;
+  backdrop-filter: blur(5px);
+  box-shadow: 0 12px 26px rgba(8, 12, 9, 0.2);
+}
+
+.landing-city-control option {
+  color: var(--ink);
+}
+
 .chat-panel textarea {
   min-height: 230px;
   margin-top: 26px;
@@ -241,6 +271,110 @@ body.finder-page-open .intro-scroll {
 
 body.finder-page-open .finder-stage {
   min-height: 100vh;
+}
+
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background:
+    radial-gradient(circle at 50% 42%, rgba(255, 222, 146, 0.16), transparent 36%),
+    rgba(13, 20, 16, 0.58);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 180ms ease;
+}
+
+.loading-overlay.is-active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.pour-loader {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  color: #fffdf6;
+}
+
+.loader-bottle-wrap {
+  position: relative;
+  width: min(190px, 42vw);
+  aspect-ratio: 905 / 1360;
+  overflow: hidden;
+  filter: drop-shadow(0 20px 28px rgba(6, 9, 7, 0.42));
+}
+
+.loader-bottle,
+.loader-bottle-fill {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.loader-bottle {
+  object-fit: contain;
+  z-index: 2;
+}
+
+.loader-bottle-fill {
+  z-index: 3;
+  background:
+    linear-gradient(180deg, rgba(255, 203, 91, 0.95), rgba(189, 78, 22, 0.92) 62%, rgba(119, 43, 17, 0.95)),
+    var(--amber);
+  mask: url("./assets/barfinder-rye-bottle.webp") center / contain no-repeat;
+  -webkit-mask: url("./assets/barfinder-rye-bottle.webp") center / contain no-repeat;
+  mix-blend-mode: multiply;
+  opacity: 0.62;
+  transform-origin: bottom;
+  animation: bottle-fill 1.65s ease-in-out infinite;
+}
+
+.pour-stream {
+  width: 12px;
+  height: 74px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(255, 225, 122, 0), rgba(255, 185, 63, 0.96), rgba(146, 55, 21, 0.98));
+  box-shadow: 0 0 20px rgba(255, 186, 69, 0.45);
+  transform-origin: bottom;
+  animation: pour-stream 1.65s ease-in-out infinite;
+}
+
+.pour-loader p {
+  margin: 0;
+  font-family: var(--script-font);
+  font-size: clamp(32px, 5vw, 54px);
+  line-height: 1;
+  text-shadow: 0 3px 18px rgba(8, 10, 8, 0.62);
+}
+
+@keyframes bottle-fill {
+  0% {
+    clip-path: inset(84% 0 0 0);
+  }
+  62% {
+    clip-path: inset(25% 0 0 0);
+  }
+  100% {
+    clip-path: inset(84% 0 0 0);
+  }
+}
+
+@keyframes pour-stream {
+  0%,
+  100% {
+    opacity: 0.28;
+    transform: scaleY(0.45);
+  }
+  28%,
+  72% {
+    opacity: 1;
+    transform: scaleY(1);
+  }
 }
 
 .workspace {
