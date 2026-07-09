@@ -474,28 +474,6 @@ textarea:focus {
   margin-top: 12px;
 }
 
-.quick-intents {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
-  margin-top: 12px;
-}
-
-.intent-chip {
-  min-height: 38px;
-  padding: 8px 10px;
-  color: #35414b;
-  font-size: 13px;
-  line-height: 1.25;
-  text-align: left;
-  background: #fbfcfc;
-}
-
-.intent-chip:hover {
-  border-color: rgba(36, 107, 91, 0.42);
-  background: rgba(36, 107, 91, 0.08);
-}
-
 .toolbar button {
   width: 44px;
   padding: 0;
@@ -524,30 +502,6 @@ textarea:focus {
 .toolbar button:not(.primary-btn) .icon,
 .json-header button .icon {
   margin: 0;
-}
-
-.taxonomy-strip {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 18px;
-}
-
-.taxonomy-token {
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  padding: 7px 10px;
-  color: var(--muted);
-  background: #fbfcfc;
-  font-size: 12px;
-  font-weight: 700;
-  white-space: nowrap;
-}
-
-.taxonomy-token.active {
-  border-color: rgba(36, 107, 91, 0.35);
-  color: var(--green-strong);
-  background: rgba(36, 107, 91, 0.1);
 }
 
 .summary-band {
@@ -987,11 +941,6 @@ pre {
 
   .bottle-stage {
     top: 0;
-  }
-
-  .intent-chip {
-    white-space: normal;
-    overflow-wrap: anywhere;
   }
 
   .metrics-row {

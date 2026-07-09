@@ -23,7 +23,10 @@ function normalizeIntentProfile(profile, taxonomy) {
         .slice(0, 6)
     : [];
 
+  const is_relevant = profile.is_relevant === false ? false : profile.is_relevant === true || weighted_tags.length > 0;
+
   return {
+    is_relevant,
     rewritten_query: String(profile.rewritten_query || "").slice(0, 180),
     weighted_tags,
     must_have: Array.isArray(profile.must_have) ? profile.must_have.map(String).slice(0, 5) : [],
@@ -31,6 +34,7 @@ function normalizeIntentProfile(profile, taxonomy) {
     mood: String(profile.mood || "").slice(0, 80),
     confidence: Math.max(0, Math.min(1, Number(profile.confidence) || 0.5)),
     clarification_question: String(profile.clarification_question || "").slice(0, 140),
+    refusal_reason: String(profile.refusal_reason || "").slice(0, 140),
   };
 }
 
@@ -65,6 +69,8 @@ export async function parseIntentWithGemini({
     "You are Barfinder's intent parser for a personal bar recommendation app.",
     "Extract the user's real drinking-night needs from casual Chinese/English mixed text.",
     "Return only strict JSON. Do not include markdown.",
+    "First decide whether the text is relevant to finding a bar, drink, nightlife venue, drinking mood, bartender help, or nearby place to drink.",
+    "If it is unrelated, set is_relevant=false, return an empty weighted_tags array, and briefly explain refusal_reason. Do not force bar tags onto unrelated text.",
     "Choose tags only from the provided taxonomy. Prefer 2-5 tags. Do not invent tags.",
     "Capture subtle constraints such as quietness, date mood, bartender guidance, budget, dancing, rooftop, whisky, and avoidances.",
     "",
@@ -74,6 +80,7 @@ export async function parseIntentWithGemini({
     "",
     "JSON schema:",
     JSON.stringify({
+      is_relevant: true,
       rewritten_query: "short normalized user need in Traditional Chinese",
       weighted_tags: [{ tag: "taxonomy tag", confidence: 0.85, reason: "short reason" }],
       must_have: ["hard requirements"],
@@ -81,6 +88,7 @@ export async function parseIntentWithGemini({
       mood: "overall vibe",
       confidence: 0.8,
       clarification_question: "empty unless the request is too ambiguous",
+      refusal_reason: "empty unless is_relevant is false",
     }),
   ].join("\n");
 

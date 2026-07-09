@@ -270,15 +270,6 @@ const bars = (window.BAR_DATA?.bars || fallbackBars).map((bar) => {
   };
 });
 
-const quickIntents = [
-  "想找安靜一點、能好好聊天的調酒",
-  "今天想喝威士忌，請 bartender 推薦",
-  "週五想熱鬧一點，有 DJ 可以跳舞",
-  "約會用，燈光好、不要太吵",
-  "朋友聚會，啤酒、划算、能訂位",
-  "想找有夜景的天台酒吧",
-];
-
 const fallbackIntentTags = ["craft_cocktails", "cozy_chill"];
 const $ = (id) => document.getElementById(id);
 
@@ -383,14 +374,17 @@ function extractIntentTags(text) {
     explicit.push(...fallbackIntentTags);
   }
 
-  return [...new Set(explicit.length ? explicit : fallbackIntentTags)];
+  return [...new Set(explicit)];
 }
 
 function fallbackIntentProfile(intentText) {
+  const tags = extractIntentTags(intentText);
+
   return {
     source: "local",
+    is_relevant: tags.length > 0,
     rewritten_query: intentText,
-    weighted_tags: extractIntentTags(intentText).map((tag) => ({
+    weighted_tags: tags.map((tag) => ({
       tag,
       confidence: 0.62,
       reason: "local keyword fallback",
@@ -398,8 +392,9 @@ function fallbackIntentProfile(intentText) {
     must_have: [],
     avoid: [],
     mood: "",
-    confidence: 0.62,
+    confidence: tags.length ? 0.62 : 0.4,
     clarification_question: "",
+    refusal_reason: tags.length ? "" : "輸入內容不像是在找酒吧、喝酒或夜生活場景。",
   };
 }
 
@@ -422,7 +417,7 @@ async function resolveIntentProfile(intentText) {
 
     if (!response.ok) throw new Error(`Intent parser unavailable: ${response.status}`);
     const data = await response.json();
-    if (!data.ok || !data.profile?.weighted_tags?.length) throw new Error(data.reason || "No intent tags");
+    if (!data.ok || !data.profile) throw new Error(data.reason || "No intent profile");
     return { ...data.profile, source: data.model || "gemini" };
   } catch {
     return fallbackIntentProfile(intentText);
@@ -439,6 +434,23 @@ function cityById(cityId) {
 
 function recommendBars({ intentText, city, area, radius, intentProfile = fallbackIntentProfile(intentText) }) {
   const currentCity = cityById(city);
+
+  if (intentProfile.is_relevant === false) {
+    const result = {
+      query: intentText,
+      city: currentCity.id,
+      city_label: currentCity.label,
+      area,
+      radius_km: radius,
+      intent_tags: [],
+      summary: "這不是一個酒吧需求",
+      recommendations: [],
+      intent_profile: intentProfile,
+    };
+    result.agent_reply = buildAgentReply(result);
+    return result;
+  }
+
   const intentTags = intentProfile.weighted_tags?.length
     ? [...new Set(intentProfile.weighted_tags.map((item) => item.tag))]
     : extractIntentTags(intentText);
@@ -536,6 +548,16 @@ function buildAgentReply(result) {
   const intentLabels = result.intent_tags.map((item) => item.label).join("、");
   const understood = result.intent_profile?.rewritten_query || result.query;
 
+  if (result.intent_profile?.is_relevant === false) {
+    return {
+      lead: "這句話不像是在找酒吧或今晚喝什麼，我先不繼續推薦。",
+      reasons: [
+        result.intent_profile.refusal_reason || "請輸入和酒吧、調酒、喝酒氛圍、地點或夜生活相關的需求。",
+      ],
+      alternatives: [],
+    };
+  }
+
   if (!result.recommendations.length) {
     return {
       lead: `我先不硬推。${result.city_label} · ${result.area} 在 ${result.radius_km}km 內，暫時沒有明確符合「${intentLabels}」的酒吧。`,
@@ -562,29 +584,6 @@ function buildAgentReply(result) {
   });
 
   return { lead, reasons, alternatives };
-}
-
-function renderTaxonomy(activeTags = []) {
-  const active = new Set(activeTags);
-  $("taxonomyStrip").innerHTML = taxonomy
-    .map(
-      (taxon) =>
-        `<span class="taxonomy-token ${active.has(taxon.tag) ? "active" : ""}">${taxon.label}</span>`,
-    )
-    .join("");
-}
-
-function renderQuickIntents() {
-  $("quickIntents").innerHTML = quickIntents
-    .map((intent) => `<button type="button" class="intent-chip">${intent}</button>`)
-    .join("");
-
-  document.querySelectorAll(".intent-chip").forEach((button) => {
-    button.addEventListener("click", () => {
-      $("intentInput").value = button.textContent;
-      runRecommendation();
-    });
-  });
 }
 
 function renderCityOptions() {
@@ -631,10 +630,11 @@ function renderRecommendations(result) {
     : "0.0";
   $("jsonOutput").textContent = JSON.stringify(result, null, 2);
 
-  renderTaxonomy(result.intent_tags.map((item) => item.tag));
-
   if (!result.recommendations.length) {
-    $("recommendationList").innerHTML = `<div class="empty-state">換個區域或放寬半徑試試</div>`;
+    $("recommendationList").innerHTML =
+      result.intent_profile?.is_relevant === false
+        ? `<div class="empty-state">沒有進入推薦流程</div>`
+        : `<div class="empty-state">換個區域或放寬半徑試試</div>`;
     return;
   }
 
@@ -712,7 +712,7 @@ function escapeHtml(value) {
 }
 
 async function runRecommendation() {
-  const intentText = $("intentInput").value.trim() || "想喝一杯好喝的調酒，舒服一點";
+  const intentText = $("intentInput").value.trim();
   const city = $("citySelect").value;
   const area = $("areaSelect").value;
   const radius = Number($("radiusSelect").value);
@@ -732,12 +732,10 @@ async function runRecommendation() {
   $("statusPill").textContent = `${parserLabel} · ${result.recommendations.length} / ${bars.filter((bar) => bar.city === city).length} bars`;
 }
 
-function loadSample() {
+function setDefaultSearchControls() {
   $("citySelect").value = "shanghai";
   renderAreaOptions("shanghai", "新天地");
   $("radiusSelect").value = "3";
-  $("intentInput").value = "想找安靜一點、能好好聊天的調酒，最好 bartender 可以推薦";
-  runRecommendation();
 }
 
 function clearIntent() {
@@ -755,7 +753,7 @@ async function copyJson(event) {
 }
 
 async function shareCurrentSearch() {
-  const intentText = $("intentInput").value.trim() || "想喝一杯好喝的調酒，舒服一點";
+  const intentText = $("intentInput").value.trim();
   const city = $("citySelect").value;
   const area = $("areaSelect").value;
   const radius = Number($("radiusSelect").value);
@@ -784,7 +782,7 @@ function initializeFromUrl() {
   const hasSharedState = Boolean(state.intentText || state.city || state.area || state.radius);
 
   if (!hasSharedState) {
-    loadSample();
+    setDefaultSearchControls();
     return;
   }
 
@@ -798,7 +796,7 @@ function initializeFromUrl() {
     $("radiusSelect").value = state.radius;
   }
 
-  $("intentInput").value = state.intentText || "想喝一杯好喝的調酒，舒服一點";
+  $("intentInput").value = state.intentText || "";
   $("landingIntentInput").value = $("intentInput").value;
   openFinderInterface({ scroll: false });
   runRecommendation();
@@ -835,7 +833,6 @@ function bindEvents() {
     enterFinderFromChat();
   });
   $("recommendBtn").addEventListener("click", runRecommendation);
-  $("sampleBtn").addEventListener("click", loadSample);
   $("clearBtn").addEventListener("click", clearIntent);
   $("copyBtn").addEventListener("click", copyJson);
   $("shareBtn").addEventListener("click", shareCurrentSearch);
@@ -852,6 +849,4 @@ function bindEvents() {
 
 bindEvents();
 renderCityOptions();
-renderQuickIntents();
-renderTaxonomy();
 initializeFromUrl();
