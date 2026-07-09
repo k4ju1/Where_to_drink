@@ -224,10 +224,10 @@ body.finder-page-open .intro-scroll {
 .chat-panel textarea {
   min-height: 230px;
   margin-top: 26px;
-  border-color: rgba(255, 253, 246, 0.62);
-  background: rgba(255, 253, 246, 0.66);
-  backdrop-filter: blur(8px);
-  box-shadow: 0 20px 44px rgba(8, 12, 9, 0.28);
+  border-color: rgba(255, 253, 246, 0.48);
+  background: rgba(255, 253, 246, 0.34);
+  backdrop-filter: blur(5px);
+  box-shadow: 0 18px 38px rgba(8, 12, 9, 0.22);
   font-size: 17px;
 }
 
