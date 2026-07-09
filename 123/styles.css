@@ -82,6 +82,10 @@ button:hover {
   isolation: isolate;
 }
 
+body.finder-page-open .intro-scroll {
+  display: none;
+}
+
 .intro-scroll::before {
   content: "";
   position: absolute;
@@ -233,6 +237,10 @@ button:hover {
 
 .finder-stage.is-open {
   display: block;
+}
+
+body.finder-page-open .finder-stage {
+  min-height: 100vh;
 }
 
 .workspace {

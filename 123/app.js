@@ -804,11 +804,10 @@ function initializeFromUrl() {
   runRecommendation();
 }
 
-function openFinderInterface({ scroll = true } = {}) {
+function openFinderInterface() {
+  document.body.classList.add("finder-page-open");
   $("finderInterface")?.classList.add("is-open");
-  if (scroll) {
-    $("finderInterface")?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }
+  window.scrollTo({ top: 0, behavior: "auto" });
 }
 
 function enterFinderFromChat() {
