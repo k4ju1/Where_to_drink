@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Barfinder 依照今晚想喝的酒與氛圍，快速找到附近適合的酒吧。"
+    />
+    <meta property="og:title" content="Barfinder" />
+    <meta
+      property="og:description"
+      content="用一句話描述今晚想喝的，獲得附近酒吧推薦。"
+    />
+    <meta property="og:type" content="website" />
+    <meta name="theme-color" content="#123a2e" />
+    <title>Barfinder</title>
+    <link rel="manifest" href="./site.webmanifest" />
+    <link rel="stylesheet" href="./styles.css?v=20260709-landing13" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <div class="intro-scroll">
+        <section class="landing-hero" aria-label="Barfinder 首頁">
+          <div class="hero-emboss" aria-hidden="true">Barfinder</div>
+          <div class="bottle-stage" aria-hidden="true">
+            <div class="bottle-halo"></div>
+            <img
+              class="hero-bottle"
+              src="./assets/barfinder-rye-bottle.png"
+              alt=""
+            />
+          </div>
+        </section>
+
+        <section class="chat-stage" id="agentDialog" aria-label="Agent 對話框">
+          <div class="chat-panel">
+            <h2>Where to drink tonight?</h2>
+            <textarea
+              id="landingIntentInput"
+              spellcheck="false"
+              placeholder="Tell me what kind of night you want..."
+            ></textarea>
+          </div>
+        </section>
+      </div>
+
+      <section class="agent-stage finder-stage" id="finderInterface" aria-label="Agent 篩選介面">
+        <div class="workspace">
+          <header class="dialog-header">
+            <div>
+              <p class="section-label">filter interface</p>
+              <h2>按類別微調，讓 Agent 幫你篩選</h2>
+            </div>
+            <div class="status-pill" id="statusPill">Ready</div>
+          </header>
+
+          <div class="layout dialog-shell">
+            <section class="input-panel" aria-label="推薦入口">
+              <div class="field-grid">
+                <label>
+                  <span>城市</span>
+                  <select id="citySelect"></select>
+                </label>
+                <label>
+                  <span>目前區域</span>
+                  <select id="areaSelect"></select>
+                </label>
+                <label>
+                  <span>搜尋半徑</span>
+                  <select id="radiusSelect">
+                    <option value="1.5">1.5 km</option>
+                    <option value="3" selected>3 km</option>
+                    <option value="5">5 km</option>
+                  </select>
+                </label>
+              </div>
+
+              <label class="textarea-label">
+                <span>直接問我</span>
+                <textarea
+                  id="intentInput"
+                  spellcheck="false"
+                  placeholder="例如：舒服一點、安靜聊天；或者：週五想熱鬧，有 DJ 可以跳舞"
+                ></textarea>
+              </label>
+
+              <div class="quick-intents" id="quickIntents" aria-label="快速需求"></div>
+
+              <div class="toolbar">
+                <button id="recommendBtn" class="primary-btn" type="button">
+                  <span class="icon">◆</span>
+                  問 Agent
+                </button>
+                <button id="sampleBtn" type="button" title="載入範例評論">
+                  <span class="icon">↺</span>
+                </button>
+                <button id="clearBtn" type="button" title="清空評論">
+                  <span class="icon">×</span>
+                </button>
+                <button id="shareBtn" type="button" title="複製分享連結">
+                  <span class="icon">↗</span>
+                </button>
+              </div>
+
+              <div class="taxonomy-strip" id="taxonomyStrip" aria-label="Taxonomy"></div>
+            </section>
+
+            <section class="results-panel" aria-label="推薦結果">
+              <div class="summary-band">
+                <p class="section-label">agent reply</p>
+                <h2 id="summaryText">你說需求，我來答</h2>
+                <div class="agent-answer" id="agentAnswer">
+                  <p>我會先理解你想要的酒、氛圍和位置，再給你一個最像朋友推薦的答案。</p>
+                </div>
+              </div>
+
+              <div class="metrics-row">
+                <div>
+                  <span class="metric-value" id="resultCount">0</span>
+                  <span class="metric-label">bars</span>
+                </div>
+                <div>
+                  <span class="metric-value" id="intentCount">0</span>
+                  <span class="metric-label">intents</span>
+                </div>
+                <div>
+                  <span class="metric-value" id="bestDistance">0.0</span>
+                  <span class="metric-label">nearest km</span>
+                </div>
+              </div>
+
+              <div class="recommendation-list" id="recommendationList"></div>
+
+              <details class="json-panel" hidden>
+                <summary class="json-header">
+                  <span class="section-label">JSON output</span>
+                  <button id="copyBtn" type="button" title="複製 JSON">
+                    <span class="icon">⧉</span>
+                  </button>
+                </summary>
+                <div>
+                  <pre id="jsonOutput">{}</pre>
+                </div>
+              </details>
+            </section>
+          </div>
+        </div>
+      </section>
+    </main>
+    <script src="./data.js?v=20260709-bars"></script>
+    <script src="./app.js?v=20260709-bars"></script>
+  </body>
+</html>

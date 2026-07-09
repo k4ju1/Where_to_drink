@@ -1,0 +1,11 @@
+{
+  "name": "nearby-bar-finder",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server.mjs",
+    "static": "python3 -m http.server 8123",
+    "check": "node --check data.js && node --check app.js && node --check server.mjs && node --check lib/intent-parser.mjs && node --check netlify/functions/intent.mjs"
+  }
+}

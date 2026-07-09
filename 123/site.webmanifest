@@ -1,0 +1,10 @@
+{
+  "name": "Barfinder",
+  "short_name": "Barfinder",
+  "description": "依照今晚想喝的酒與氛圍，快速找到附近適合的酒吧。",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#13241f",
+  "theme_color": "#123a2e",
+  "lang": "zh-Hant"
+}
