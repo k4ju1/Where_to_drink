@@ -699,11 +699,13 @@ function renderRecommendations(result) {
     .join("");
 }
 
-function setLoading(isLoading) {
+function setLoading(isLoading, mode = "finder") {
   const overlay = $("loadingOverlay");
+  const isLanding = mode === "landing";
+  document.body.classList.toggle("intro-loading", isLoading && isLanding);
   if (!overlay) return;
-  overlay.classList.toggle("is-active", isLoading);
-  overlay.setAttribute("aria-hidden", isLoading ? "false" : "true");
+  overlay.classList.toggle("is-active", isLoading && !isLanding);
+  overlay.setAttribute("aria-hidden", isLoading && !isLanding ? "false" : "true");
 }
 
 function renderAgentAnswer(reply) {
@@ -736,12 +738,13 @@ function escapeHtml(value) {
     .replaceAll("'", "&#039;");
 }
 
-async function runRecommendation() {
+async function runRecommendation({ landingTransition = false } = {}) {
   const intentText = $("intentInput").value.trim();
   const city = $("citySelect").value;
   const area = $("areaSelect").value;
   const radius = Number($("radiusSelect").value);
-  setLoading(true);
+  const startedAt = Date.now();
+  setLoading(true, landingTransition ? "landing" : "finder");
 
   try {
     setStatus("Reading intent");
@@ -765,6 +768,12 @@ async function runRecommendation() {
       candidateBars,
     });
 
+    if (landingTransition) {
+      const remainingAnimation = Math.max(0, 10000 - (Date.now() - startedAt));
+      if (remainingAnimation) await new Promise((resolve) => window.setTimeout(resolve, remainingAnimation));
+      openFinderInterface();
+    }
+
     renderRecommendations(result);
     setUrlState({ intentText, city, area, radius });
     const parserLabel = intentProfile.source === "local" ? "local" : "Gemini";
@@ -772,7 +781,7 @@ async function runRecommendation() {
       `${parserLabel} · ${barSourceLabel} · ${result.recommendations.length} / ${candidateBars.filter((bar) => bar.city === city).length} bars`,
     );
   } finally {
-    setLoading(false);
+    setLoading(false, landingTransition ? "landing" : "finder");
   }
 }
 
@@ -860,8 +869,8 @@ function enterFinderFromChat() {
   if (chatText) $("intentInput").value = chatText;
   $("citySelect").value = landingCity;
   renderAreaOptions(landingCity);
-  openFinderInterface();
-  runRecommendation();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+  runRecommendation({ landingTransition: true });
 }
 
 function bindEvents() {

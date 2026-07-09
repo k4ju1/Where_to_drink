@@ -149,6 +149,10 @@ body.finder-page-open .intro-scroll {
   z-index: 1;
 }
 
+body.intro-loading .chat-stage {
+  pointer-events: none;
+}
+
 .hero-brand {
   position: absolute;
   top: clamp(28px, 5vh, 52px);
@@ -185,6 +189,82 @@ body.finder-page-open .intro-scroll {
   max-width: none;
   object-fit: contain;
   filter: drop-shadow(0 26px 34px rgba(14, 24, 20, 0.34));
+}
+
+.hero-bottle-fill {
+  position: absolute;
+  z-index: 2;
+  height: clamp(980px, 150vh, 1360px);
+  aspect-ratio: 905 / 1360;
+  background:
+    linear-gradient(180deg, rgba(255, 219, 119, 0.96), rgba(211, 96, 23, 0.95) 58%, rgba(117, 39, 13, 0.98)),
+    var(--amber);
+  mask: url("./assets/barfinder-rye-bottle.webp") center / contain no-repeat;
+  -webkit-mask: url("./assets/barfinder-rye-bottle.webp") center / contain no-repeat;
+  mix-blend-mode: multiply;
+  opacity: 0;
+  clip-path: inset(52% 0 0 0);
+  pointer-events: none;
+}
+
+.hero-pour-stream {
+  position: absolute;
+  top: clamp(10px, 2.6vh, 34px);
+  left: 50%;
+  z-index: 3;
+  width: clamp(10px, 1.25vw, 17px);
+  height: clamp(112px, 17vh, 180px);
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(255, 231, 137, 0), rgba(255, 190, 55, 0.98), rgba(143, 53, 17, 0.98));
+  box-shadow: 0 0 28px rgba(255, 183, 62, 0.5);
+  opacity: 0;
+  transform: translateX(-50%) scaleY(0.35);
+  transform-origin: top;
+  pointer-events: none;
+}
+
+body.intro-loading .hero-bottle {
+  filter:
+    saturate(0.58)
+    brightness(0.82)
+    drop-shadow(0 26px 34px rgba(14, 24, 20, 0.34));
+}
+
+body.intro-loading .hero-bottle-fill {
+  opacity: 0.78;
+  animation: hero-bottle-fill 10s ease-in-out forwards;
+}
+
+body.intro-loading .hero-pour-stream {
+  animation: hero-pour-stream 10s ease-in-out forwards;
+}
+
+@keyframes hero-bottle-fill {
+  0% {
+    clip-path: inset(52% 0 0 0);
+  }
+  72% {
+    clip-path: inset(10% 0 0 0);
+  }
+  100% {
+    clip-path: inset(6% 0 0 0);
+  }
+}
+
+@keyframes hero-pour-stream {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) scaleY(0.28);
+  }
+  8%,
+  86% {
+    opacity: 1;
+    transform: translateX(-50%) scaleY(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-50%) scaleY(0.22);
+  }
 }
 
 .chat-stage,
