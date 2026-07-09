@@ -819,8 +819,19 @@ function enterFinderFromChat() {
 }
 
 function bindEvents() {
-  $("landingIntentInput")?.addEventListener("keydown", (event) => {
-    if (event.key !== "Enter" || event.shiftKey) return;
+  const landingInput = $("landingIntentInput");
+  let isComposingText = false;
+
+  landingInput?.addEventListener("compositionstart", () => {
+    isComposingText = true;
+  });
+  landingInput?.addEventListener("compositionend", () => {
+    isComposingText = false;
+  });
+  landingInput?.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter" || event.shiftKey || event.isComposing || isComposingText || event.keyCode === 229) {
+      return;
+    }
     event.preventDefault();
     enterFinderFromChat();
   });
