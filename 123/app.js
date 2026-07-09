@@ -191,6 +191,11 @@ const manualBars = (window.BAR_DATA?.bars || []).map(normalizeBarRecord);
 const fallbackIntentTags = ["craft_cocktails", "cozy_chill"];
 const $ = (id) => document.getElementById(id);
 
+function setStatus(message) {
+  const statusPill = $("statusPill");
+  if (statusPill) statusPill.textContent = message;
+}
+
 function normalize(text) {
   return text
     .toLowerCase()
@@ -721,13 +726,13 @@ async function runRecommendation() {
   const city = $("citySelect").value;
   const area = $("areaSelect").value;
   const radius = Number($("radiusSelect").value);
-  $("statusPill").textContent = "Reading intent";
+  setStatus("Reading intent");
   const intentProfile = await resolveIntentProfile(intentText);
   let candidateBars = manualBars.filter((bar) => bar.city === city);
   let barSourceLabel = candidateBars.length ? "manual" : "no bar source";
 
   if (intentProfile.is_relevant !== false) {
-    $("statusPill").textContent = "Finding real bars";
+    setStatus("Finding real bars");
     const resolvedBars = await resolveCandidateBars({ intentText, city, area, radius });
     candidateBars = resolvedBars.bars;
     barSourceLabel = resolvedBars.sourceLabel;
@@ -745,8 +750,9 @@ async function runRecommendation() {
   renderRecommendations(result);
   setUrlState({ intentText, city, area, radius });
   const parserLabel = intentProfile.source === "local" ? "local" : "Gemini";
-  $("statusPill").textContent =
-    `${parserLabel} · ${barSourceLabel} · ${result.recommendations.length} / ${candidateBars.filter((bar) => bar.city === city).length} bars`;
+  setStatus(
+    `${parserLabel} · ${barSourceLabel} · ${result.recommendations.length} / ${candidateBars.filter((bar) => bar.city === city).length} bars`,
+  );
 }
 
 function setDefaultSearchControls() {
@@ -763,9 +769,9 @@ function clearIntent() {
 async function copyJson(event) {
   event?.stopPropagation();
   await navigator.clipboard.writeText($("jsonOutput").textContent);
-  $("statusPill").textContent = "JSON copied";
+  setStatus("JSON copied");
   window.setTimeout(() => {
-    $("statusPill").textContent = "Ready";
+    setStatus("Ready");
   }, 1400);
 }
 
@@ -787,9 +793,9 @@ async function shareCurrentSearch() {
   } catch (error) {
     if (error.name === "AbortError") return;
     await navigator.clipboard.writeText(shareUrl);
-    $("statusPill").textContent = "Link copied";
+    setStatus("Link copied");
     window.setTimeout(() => {
-      $("statusPill").textContent = "Ready";
+      setStatus("Ready");
     }, 1400);
   }
 }
@@ -850,9 +856,7 @@ function bindEvents() {
     enterFinderFromChat();
   });
   $("recommendBtn").addEventListener("click", runRecommendation);
-  $("clearBtn").addEventListener("click", clearIntent);
   $("copyBtn").addEventListener("click", copyJson);
-  $("shareBtn").addEventListener("click", shareCurrentSearch);
   $("citySelect").addEventListener("change", () => {
     renderAreaOptions($("citySelect").value);
     runRecommendation();
@@ -860,7 +864,7 @@ function bindEvents() {
   $("areaSelect").addEventListener("change", runRecommendation);
   $("radiusSelect").addEventListener("change", runRecommendation);
   $("intentInput").addEventListener("input", () => {
-    $("statusPill").textContent = "Edited";
+    setStatus("Edited");
   });
 }
 
