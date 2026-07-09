@@ -75,8 +75,8 @@ button:hover {
   min-height: 200vh;
   background:
     linear-gradient(180deg, rgba(12, 19, 13, 0.16), rgba(12, 19, 13, 0.34)),
-    url("./assets/angel-mural-vertical.png") center top / auto 100% no-repeat,
-    url("./assets/angel-mural-vertical.png") center top / cover no-repeat,
+    url("./assets/angel-mural-vertical.webp") center top / auto 100% no-repeat,
+    url("./assets/angel-mural-vertical.webp") center top / cover no-repeat,
     #1b211d;
   overflow: hidden;
   isolation: isolate;

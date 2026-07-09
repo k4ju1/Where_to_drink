@@ -16,6 +16,8 @@
     <meta name="theme-color" content="#123a2e" />
     <title>Barfinder</title>
     <link rel="manifest" href="./site.webmanifest" />
+    <link rel="preload" as="image" href="./assets/angel-mural-vertical.webp" fetchpriority="high" />
+    <link rel="preload" as="image" href="./assets/barfinder-rye-bottle.webp" fetchpriority="high" />
     <link rel="stylesheet" href="./styles.css?v=20260709-landing13" />
   </head>
   <body>
@@ -27,7 +29,11 @@
             <div class="bottle-halo"></div>
             <img
               class="hero-bottle"
-              src="./assets/barfinder-rye-bottle.png"
+              src="./assets/barfinder-rye-bottle.webp"
+              width="905"
+              height="1360"
+              decoding="async"
+              fetchpriority="high"
               alt=""
             />
           </div>
