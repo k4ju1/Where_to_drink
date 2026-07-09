@@ -138,9 +138,17 @@ const fallbackCities = [
   {
     id: "shanghai",
     label: "上海",
+    countryCode: "CN",
     dianpingCityId: 1,
     defaultArea: "新天地",
-    areas: ["靜安寺", "新天地", "外灘", "徐家匯"],
+    areas: ["靜安寺", "新天地", "外灘", "徐家匯", "巨鹿路", "愚園路", "陸家嘴", "人民廣場", "淮海中路", "五角場"],
+  },
+  {
+    id: "hongkong",
+    label: "香港",
+    countryCode: "HK",
+    defaultArea: "中環",
+    areas: ["中環", "上環", "蘭桂坊", "蘇豪", "金鐘", "灣仔", "銅鑼灣", "尖沙咀", "西九龍", "旺角", "堅尼地城", "太古坊"],
   },
 ];
 
@@ -150,6 +158,7 @@ const dianpingCityIds = {
   beijing: 2,
   shenzhen: 7,
   hangzhou: 3,
+  hongkong: 1,
 };
 
 function dianpingUrlFor(cityId, title) {
