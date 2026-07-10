@@ -713,7 +713,6 @@ function renderAgentAnswer(reply) {
   const alternatives = reply.alternatives.length
     ? `
       <div class="agent-section">
-        <strong>備選</strong>
         <ul>${reply.alternatives.map((line) => `<li>${escapeHtml(line)}</li>`).join("")}</ul>
       </div>
     `
@@ -722,7 +721,6 @@ function renderAgentAnswer(reply) {
   $("agentAnswer").innerHTML = `
     <p>${escapeHtml(reply.lead)}</p>
     <div class="agent-section">
-      <strong>為什麼</strong>
       <ul>${reasons}</ul>
     </div>
     ${alternatives}
