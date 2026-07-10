@@ -18,7 +18,7 @@
     <link rel="manifest" href="./site.webmanifest" />
     <link rel="preload" as="image" href="./assets/angel-mural-vertical.webp" fetchpriority="high" />
     <link rel="preload" as="image" href="./assets/barfinder-rye-bottle.webp" fetchpriority="high" />
-    <link rel="stylesheet" href="./styles.css?v=20260709-heropour" />
+    <link rel="stylesheet" href="./styles.css?v=20260710-finderui" />
   </head>
   <body>
     <main class="app-shell">
@@ -37,7 +37,6 @@
               alt=""
             />
             <div class="hero-bottle-fill" aria-hidden="true"></div>
-            <div class="hero-pour-stream" aria-hidden="true"></div>
           </div>
         </section>
 
@@ -60,8 +59,9 @@
       <section class="agent-stage finder-stage" id="finderInterface" aria-label="Agent 篩選介面">
         <div class="workspace">
           <header class="dialog-header">
-            <div>
-              <h2>按類別微調，讓 Agent 幫你篩選</h2>
+            <div class="finder-title">
+              <span class="finder-wordmark">Barfinder</span>
+              <h1>今晚去哪喝？</h1>
             </div>
           </header>
 
@@ -152,7 +152,6 @@
         </div>
         <div class="loading-overlay" id="loadingOverlay" aria-live="polite" aria-hidden="true">
           <div class="pour-loader">
-            <div class="pour-stream" aria-hidden="true"></div>
             <div class="loader-bottle-wrap" aria-hidden="true">
               <div class="loader-bottle-fill"></div>
               <img

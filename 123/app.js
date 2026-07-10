@@ -671,27 +671,35 @@ function renderRecommendations(result) {
         .join("");
       const linkLabel = bar.source === "google" ? "Google Maps" : "大众点评";
       const ratingMeta = bar.rating
-        ? ` · ★ ${bar.rating.toFixed(1)}${bar.userRatingCount ? ` (${bar.userRatingCount})` : ""}`
+        ? `<span class="meta-item">★ ${bar.rating.toFixed(1)}${bar.userRatingCount ? ` (${bar.userRatingCount})` : ""}</span>`
         : "";
-      const addressMeta = bar.address ? ` · ${escapeHtml(bar.address)}` : "";
+      const priceMeta = bar.price ? `<span class="meta-item">${escapeHtml(bar.price)}</span>` : "";
+      const addressMeta = bar.address
+        ? `<span class="meta-item meta-address">${escapeHtml(bar.address)}</span>`
+        : "";
+      const score = Math.round(bar.recommendation_score * 100);
 
       return `
         <article class="recommendation-card">
-          <div class="rank">${index + 1}</div>
+          <div class="rank" aria-label="第 ${index + 1} 名">${String(index + 1).padStart(2, "0")}</div>
           <div class="recommendation-main">
             <div class="recommendation-head">
               <div>
                 <h3>${escapeHtml(bar.title || bar.name)}</h3>
-                <p>
-                  ${escapeHtml(bar.cityLabel)} · ${escapeHtml(bar.area)} · ${bar.distance_km.toFixed(1)} km · ${escapeHtml(bar.price)}${ratingMeta}${addressMeta}
-                  <a class="dianping-link" href="${escapeHtml(bar.place_url || bar.dianping_url)}" target="_blank" rel="noopener noreferrer">${linkLabel}</a>
-                </p>
+                <div class="recommendation-meta">
+                  <span class="meta-item">${escapeHtml(bar.cityLabel)} · ${escapeHtml(bar.area)}</span>
+                  <span class="meta-item">${bar.distance_km.toFixed(1)} km</span>
+                  ${priceMeta}${ratingMeta}${addressMeta}
+                </div>
               </div>
-              <div class="score-badge">${Math.round(bar.recommendation_score * 100)}</div>
+              <div class="score-badge" aria-label="匹配度 ${score}%"><strong>${score}</strong><span>%</span></div>
             </div>
             <div class="token-row">${matches}</div>
             <div class="token-row subtle-row">${vibes}${warnings}</div>
             <ul class="evidence-list">${evidenceHtml}</ul>
+            <a class="dianping-link" href="${escapeHtml(bar.place_url || bar.dianping_url)}" target="_blank" rel="noopener noreferrer">
+              <span>在 ${linkLabel} 查看</span><span aria-hidden="true">↗</span>
+            </a>
           </div>
         </article>
       `;
